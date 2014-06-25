@@ -3,26 +3,27 @@
  *
  * This file is part of QuickP3D.
  *
- * QuickP3D is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * QuickP3D is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * QuickP3D is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * QuickP3D is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
  * QuickP3D. If not, see http://www.gnu.org/licenses/.
  */
-
 package quickp3d;
 
 import com.jogamp.newt.event.KeyEvent;
+import java.awt.Point;
 import java.util.ArrayList;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import processing.core.PApplet;
+import static processing.core.PConstants.PI;
 import processing.core.PGraphics;
 import processing.opengl.PGraphics2D;
 import processing.opengl.PGraphics3D;
@@ -33,21 +34,21 @@ import quickp3d.simplegraphics.Axis;
 
 /**
  * Exemplo de um objeto gráfico 3D.
- * 
- * Esta classe desenha um objeto tridmensional composto por três setas, uma para 
+ *
+ * Esta classe desenha um objeto tridmensional composto por três setas, uma para
  * cada eixo, em um ponto pivô predefinido e coloridas em RGB, respectivamente.
- * 
+ *
  * @author Anderson Antunes
  */
-
 public class DrawingPanel3D implements Graph2D, Graph3D {
+
     /**
-     * 
+     *
      */
     public static final float DEFAULT_SCALE = 100f;
     public static final float RESET_SCALE = 1 / 100f;
     /**
-     * Deslocamento 
+     * Deslocamento
      */
     protected static final int DEFAULT_MOVE = 10;
     protected int width;
@@ -64,27 +65,27 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
     protected float theta = 250;
     protected Scene3D scene3D;
     protected int scale = 100;
+    private Point tmpPoint = new Point();
     private ArrayList<Graph> graphics = new ArrayList<>();
 
     /*
      * Função de teste para a classe DrawingPanel3D.
      */
-    
-    public static void main (String [] args){
-        
+    public static void main(String[] args) {
+
         // instanciando um painel de desenho de 300px x 300px
-        DrawingPanel3D drawingPanel = new DrawingPanel3D(300,300);
+        DrawingPanel3D drawingPanel = new DrawingPanel3D(300, 300);
         // criando e exibindo a janela principal
         drawingPanel.createFrame("Meu teste de desenho 3D");
         // incluindo um objeto 3D (no caso as setas RGB no ponto [0,0,0])
         drawingPanel.append(new Axis());
-        
+
     }
-    
+
     /**
      * Classe controladora das funções de desenho (2D/3D) e movimentação usando
      * o teclado e o mouse.
-     * 
+     *
      * <dl>
      * <dt>Mouse:</dt>
      * <dd>Mover a câmera</dd>
@@ -106,17 +107,16 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
      * <dd>Desce</dd>
      *
      */
-    
     public class Scene3D extends PApplet {
-        
+
         private final ArrayList<Integer> keys = new ArrayList<>();
         private PGraphics3D pGraphics3D;
         private PGraphics2D pGraphics2D;
 
         protected Scene3D() {
-            
+
         }
-        
+
         public JFrame createFrame(String name) {
 
             JFrame jFrame = new JFrame(name) {
@@ -147,6 +147,33 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
             mouseDragged();
 
             return jFrame;
+        }
+
+        public JPanel createPanel() {
+            JPanel panel = new JPanel() {
+                private long time = System.currentTimeMillis();
+
+                @Override
+                public void validate() {
+                    super.validate();
+
+                    //evita reconstruir os buffers com frequencia
+                    if (System.currentTimeMillis() - time > 50) {
+//                        System.out.println("validate");
+                        scene3D.resizeFrame(this.getWidth(), this.getHeight());
+                    } else {
+                        time = System.currentTimeMillis();
+                    }
+                }
+            };
+
+            PApplet pApplet = this;
+            pApplet.init();
+            panel.add(pApplet);
+            panel.setSize(DrawingPanel3D.this.width, DrawingPanel3D.this.height);
+            mouseDragged();
+
+            return panel;
         }
 
         public void resizeFrame(int width, int height) {
@@ -347,19 +374,18 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
             DrawingPanel3D.this.keyReleased(this);
         }
     }
-    
+
     /**
-     * Cria um painel de desenho utilizando uma classe que extende/sobrescreve
-     * a classe {@link quickp3d.DrawingPanel3D.Scene3D}.
+     * Cria um painel de desenho utilizando uma classe que extende/sobrescreve a
+     * classe {@link quickp3d.DrawingPanel3D.Scene3D}.
      * <p>
      * Util <b>apenas</b> quando se quer alterar/remover funções de controle do
      * teclado ou mouse já existentes.
-     * 
+     *
      * @param width comprimento x da janela
      * @param height altura y da janela
      * @param scene3D nova classe controladora
      */
-
     public DrawingPanel3D(int width, int height, Scene3D scene3D) {
         this.width = width;
         this.height = height;
@@ -371,7 +397,7 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
         this.height = height;
         this.scene3D = new Scene3D();
     }
-    
+
     public void append(Graph g) {
         graphics.add(g);
     }
@@ -382,6 +408,10 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
 
     public JFrame createFrame(String name) {
         return scene3D.createFrame(name);
+    }
+
+    public JPanel createPanel() {
+        return scene3D.createPanel();
     }
 
     public void setup(Scene3D applet) {
@@ -399,6 +429,43 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
         g2d.textSize(15);
         g2d.textAlign = PApplet.RIGHT;
         g2d.text("fps: " + (int) scene3D.frameRate, scene3D.width - 30, scene3D.height - 40);
+    }
+
+    public Point left(Point p) {
+        float t = theta % 1000;
+        if (t < 0) {
+            t += 1000;
+        }
+        t += 125;
+        if (t < 250) {
+            p.x = 1;
+            p.y = 0;
+        } else if (t < 500) {
+            p.x = 0;
+            p.y = -1;
+        } else if (t < 750) {
+            p.x = -1;
+            p.y = 0;
+        } else {
+            p.x = 0;
+            p.y = 1;
+        }
+        return p;
+    }
+
+    public Point right(Point p) {
+        p.setLocation(left(p));
+        p.x *= -1;
+        p.y *= -1;
+        return p;
+    }
+
+    public Point left() {
+        return left(tmpPoint);
+    }
+
+    public Point right() {
+        return right(tmpPoint);
     }
 
     public void mouseClicked(PApplet applet) {
