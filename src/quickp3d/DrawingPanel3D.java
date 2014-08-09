@@ -19,6 +19,8 @@ package quickp3d;
 
 import com.jogamp.newt.event.KeyEvent;
 import java.awt.Point;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -117,6 +119,19 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
 
         }
 
+        protected Scene3D(boolean fillParentComponent) {
+            if (fillParentComponent) {
+                addComponentListener(new ComponentAdapter() {
+                    @Override
+                    public void componentResized(ComponentEvent e) {
+                        DrawingPanel3D.this.width = e.getComponent().getWidth();
+                        DrawingPanel3D.this.height = e.getComponent().getHeight();
+                        resizeFrame(e.getComponent().getWidth(), e.getComponent().getHeight());
+                    }
+                });
+            }
+        }
+
         public JFrame createFrame(String name) {
 
             JFrame jFrame = new JFrame(name) {
@@ -200,6 +215,7 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
             pGraphics2D = (PGraphics2D) createGraphics(DrawingPanel3D.this.width, DrawingPanel3D.this.height, P2D);
             DrawingPanel3D.this.setup(this);
             hint(DISABLE_DEPTH_TEST);
+            hint(DISABLE_OPENGL_ERRORS);
         }
 
         @Override
@@ -392,17 +408,21 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
         this.scene3D = scene3D;
     }
 
-    public DrawingPanel3D(int width, int height) {
+    public DrawingPanel3D(int width, int height, boolean fillParentComponent) {
         this.width = width;
         this.height = height;
-        this.scene3D = new Scene3D();
+        this.scene3D = new Scene3D(fillParentComponent);
+    }
+
+    public DrawingPanel3D(int width, int height) {
+        this(width, height, false);
     }
 
     public void append(Graph g) {
         graphics.add(g);
     }
 
-    public PApplet getApplet() {
+    public Scene3D getApplet() {
         return scene3D;
     }
 
