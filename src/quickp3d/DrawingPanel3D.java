@@ -53,6 +53,7 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
      * Deslocamento
      */
     protected static final int DEFAULT_MOVE = 10;
+    protected boolean panInsteadOfZoom = false;
     protected int width;
     protected int height;
     protected int posX = 0;
@@ -214,8 +215,8 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
             pGraphics3D = (PGraphics3D) createGraphics(DrawingPanel3D.this.width, DrawingPanel3D.this.height, P3D);
             pGraphics2D = (PGraphics2D) createGraphics(DrawingPanel3D.this.width, DrawingPanel3D.this.height, P2D);
             DrawingPanel3D.this.setup(this);
-            hint(DISABLE_DEPTH_TEST);
-            hint(DISABLE_OPENGL_ERRORS);
+//            hint(DISABLE_DEPTH_TEST);
+//            hint(DISABLE_OPENGL_ERRORS);
         }
 
         @Override
@@ -289,10 +290,32 @@ public class DrawingPanel3D implements Graph2D, Graph3D {
                             }
                             break;
                         case KeyEvent.VK_Q:
-                            scale++;
+                            if (panInsteadOfZoom) {
+                                theta += 5;
+                                float c = 2 * PI * theta / 1000;
+
+                                atX = atDist * sin(c);
+                                atY = atDist * cos(c);
+
+                                upX = -sin(c);
+                                upY = -cos(c);
+                            } else {
+                                scale++;
+                            }
                             break;
                         case KeyEvent.VK_E:
-                            scale--;
+                            if (panInsteadOfZoom) {
+                                theta -= 5;
+                                float c = 2 * PI * theta / 1000;
+
+                                atX = atDist * sin(c);
+                                atY = atDist * cos(c);
+
+                                upX = -sin(c);
+                                upY = -cos(c);
+                            } else {
+                                scale--;
+                            }
                             break;
                     }
                 }

@@ -17,7 +17,6 @@
  */
 package quickp3d.tools;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -72,6 +71,10 @@ public class ObjectPicker<T> implements Iterable<T> {
             support.firePropertyChange(REMOVE, null, t);
         }
         selected.clear();
+    }
+
+    public boolean isEmpty() {
+        return selected.isEmpty();
     }
 
     public int getSize() {
